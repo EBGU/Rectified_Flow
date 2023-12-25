@@ -33,7 +33,7 @@ class Interpolation_Dataset(Dataset):
         self.width, self.height = imgSize
         self.imgList = os.listdir(root)
         self.list = os.listdir(root)
-        if labels is None:
+        if labels == "None":
             self.labels = None
             self.cat_num = 0
         else:
@@ -42,7 +42,7 @@ class Interpolation_Dataset(Dataset):
     def __getitem__(self, index,t=None):
         #index = random.randint(0,9)
         filename = self.imgList[int(index)]
-        if self.labels == "None": 
+        if self.labels is None: 
             label = 0 #label always from 1
         else:
             label = int(filename.split('.')[0].split('_')[1])
@@ -55,6 +55,7 @@ class Interpolation_Dataset(Dataset):
         if t is None:
             t = np.random.rand()
         noise =torch.tensor(truncnorm.rvs(a=-1,b=1,scale=1,size=tuple(img.shape)))
+        #noise = torch.normal(0,1,img.shape)
         noisy_img = t*img+(1-t)*noise
         return noisy_img,img,noise,t,label
 

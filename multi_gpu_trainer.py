@@ -27,14 +27,14 @@ def init_process_group(world_size, rank):
         world_size=world_size,
         rank=rank)
 
-def evaluate(model,sigma1, dataloader, device):
+def evaluate(model, dataloader, device):
     model.eval()
     datagenerator = iter(dataloader)
     loss_arr = []
     for _ in range(len(dataloader)):
         noisy_img,img,noise,t,labels = next(datagenerator)
-        noisy_img = noisy_img.to(device)
-        img = img.to(device)
+        noisy_img = noisy_img.float().to(device)
+        img = img.float().to(device)
         t = t.float().to(device)
         noise = noise.float().to(device)
         labels = labels.long().to(device)
@@ -113,8 +113,8 @@ def main(
         train_generator = iter(train_dataloader)
         for _ in range(len(train_dataloader)):
             noisy_img,img,noise,t,labels = next(train_generator)
-            noisy_img = noisy_img.to(device)
-            img = img.to(device)
+            noisy_img = noisy_img.float().to(device)
+            img = img.float().to(device)
             t = t.float().to(device)
             noise = noise.float().to(device)
             labels = labels.long().to(device)
@@ -137,7 +137,7 @@ def main(
         del noisy_img,img,t,loss
         
         test_sampler.set_epoch(epoch)
-        vloss = evaluate(model,sigma1,test_dataloader,device)#gamma_array[epoch])
+        vloss = evaluate(model,test_dataloader,device)#gamma_array[epoch])
         vloss =  torch.tensor(vloss,device=device)
         dist.all_reduce(vloss, op=dist.ReduceOp.SUM)
         vloss /= torch.distributed.get_world_size()
@@ -169,8 +169,8 @@ if __name__ == '__main__':
     import shutil
     current_path = os.path.dirname(os.path.abspath(__file__))
     sys.path.append(current_path)
-    ExpName = sys.argv[1]
-    #ExpName = '20231108_L'
+    #ExpName = sys.argv[1]
+    ExpName = '20231225'
     with open(current_path+'/'+ExpName+'.yaml') as f:
         training_parameters = yaml.full_load(f)
 
