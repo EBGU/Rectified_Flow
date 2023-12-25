@@ -6,7 +6,7 @@ from torch.utils.data.dataset import Dataset
 from PIL import Image
 import torchvision.transforms.functional as F
 import random
-
+from scipy.stats import truncnorm
 def pil_loader(path: str) -> Image.Image:
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
@@ -14,7 +14,8 @@ def pil_loader(path: str) -> Image.Image:
         return img.convert('RGB')
 
 
-class BFNDataset(Dataset): 
+
+class Interpolation_Dataset(Dataset): 
     '''
     your folder should have following structrues:
     
@@ -26,37 +27,36 @@ class BFNDataset(Dataset):
     def __init__(self,
                  root: str,
                  imgSize=[32,32],
-                 sigma1=0.001,
-                 tmin = 1e-4,
-                 labels = '/home/jiayinjun/Bayesian_Flow_Networks/tmp/OxfordFlowersLabels.npy'):
+                 labels = "None"):
 
         self.root = root
         self.width, self.height = imgSize
         self.imgList = os.listdir(root)
         self.list = os.listdir(root)
-        self.sigma1 = sigma1
-        self.labels = np.load(labels)
-        self.cat_num = max(self.labels)-min(self.labels)+1 
-        self.tmin = tmin
+        if labels is None:
+            self.labels = None
+            self.cat_num = 0
+        else:
+            self.labels = np.load(labels)
+            self.cat_num = max(self.labels)-min(self.labels)+1 
     def __getitem__(self, index,t=None):
         #index = random.randint(0,9)
         filename = self.imgList[int(index)]
-        if random.random() > 0: #1/self.cat_num: #mask some label
-            label = int(filename.split('.')[0].split('_')[1])
-            label = self.labels[label-1]
-        else:
+        if self.labels == "None": 
             label = 0 #label always from 1
+        else:
+            label = int(filename.split('.')[0].split('_')[1])
+            label = self.labels[label-1]            
         path = os.path.join(self.root,filename)
         img = pil_loader(path)
         img = F.to_tensor(img)
         img = F.resize(img,(self.width,self.height),antialias=False)
         img = img*2 -1 #[xmin, xmax] = [−1, 1]
         if t is None:
-            t = np.random.rand()*(1-self.tmin)+self.tmin
-        gamma = 1-self.sigma1**(2*t)
-        noise = torch.normal(0,math.sqrt(gamma*(1-gamma)),img.shape)
-        noisy_img = gamma*img+noise
-        return noisy_img,img,t,gamma,label
+            t = np.random.rand()
+        noise =torch.tensor(truncnorm.rvs(a=-1,b=1,scale=1,size=tuple(img.shape)))
+        noisy_img = t*img+(1-t)*noise
+        return noisy_img,img,noise,t,label
 
     def __len__(self):
         return len(self.imgList)
@@ -64,14 +64,16 @@ class BFNDataset(Dataset):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    dataset = BFNDataset("/data/protein/OxfordFlowers/train",[64,64],sigma1=0.01)
-    for i in range(0,2000,20):
+    dataset = Interpolation_Dataset("/data/protein/OxfordFlowers/train",[64,64],'/home/jiayinjun/Rectified_Flow/OxfordFlowersLabels.npy')
+    for i in range(0,2000,200):
         print(i)
-        img,noisy_img,t,gamma,label = dataset.__getitem__(0,i/2000)
+        noisy_img,img,noise,t,label = dataset.__getitem__(0,i/2000)
         img = (img + 1)/2
         noisy_img = (noisy_img + 1)/2
-        img,noisy_img = F.to_pil_image(img),F.to_pil_image(noisy_img)
-        fig,(ax1,ax2) = plt.subplots(1,2)
+        noise = (noise+1)/2
+        img,noisy_img,noise = F.to_pil_image(img),F.to_pil_image(noisy_img),F.to_pil_image(noise)
+        fig,(ax1,ax2,ax3) = plt.subplots(1,3)
         ax1.imshow(img)
         ax2.imshow(noisy_img)
-        plt.savefig('/home/jiayinjun/Bayesian_Flow_Networks/tmp/test_dataloader.png')
+        ax3.imshow(noise)
+        plt.savefig('/home/jiayinjun/Rectified_Flow/tmp/test_dataloader.png')
