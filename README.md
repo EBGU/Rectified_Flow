@@ -2,24 +2,24 @@
 A replication of [Rectified Flow](https://arxiv.org/abs/2209.03003) paper with PyTorch and [U-ViT](https://arxiv.org/pdf/2209.12152.pdf).
 
 <p align="center" style="margin-bottom: 0px;">
-  <img src="images/01.png" width="100" />
-  <img src="images/02.png" width="100" /> 
-  <img src="images/03.png" width="100" />
-  <img src="images/04.png" width="100" />
+  <img src="images/01.png" width="200" />
+  <img src="images/02.png" width="200" /> 
+  <img src="images/03.png" width="200" />
+  <img src="images/04.png" width="200" />
 </p>
 
 <p align="center" style="margin-bottom: 0px;">
-  <img src="images/05.png" width="100" />
-  <img src="images/06.png" width="100" /> 
-  <img src="images/07.png" width="100" />
-  <img src="images/08.png" width="100" />
+  <img src="images/05.png" width="200" />
+  <img src="images/06.png" width="200" /> 
+  <img src="images/07.png" width="200" />
+  <img src="images/08.png" width="200" />
 </p>
 
 <p align="center">
-  <img src="images/09.png" width="100" />
-  <img src="images/10.png" width="100" /> 
-  <img src="images/11.png" width="100" />
-  <img src="images/12.png" width="100" />
+  <img src="images/09.png" width="200" />
+  <img src="images/10.png" width="200" /> 
+  <img src="images/11.png" width="200" />
+  <img src="images/12.png" width="200" />
 </p>
 To train a new model, you can modify the yaml file and:
 
