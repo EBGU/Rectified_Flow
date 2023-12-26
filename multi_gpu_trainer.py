@@ -40,7 +40,7 @@ def evaluate(model, dataloader, device):
         labels = labels.long().to(device)
         with torch.no_grad():
             velocity = model(noisy_img,t,labels)
-            loss = F.smooth_l1_loss(velocity,noise-img)
+            loss = F.smooth_l1_loss(velocity,img-noise)
         loss_arr.append(loss.item())
     return np.array(loss_arr).mean()
 

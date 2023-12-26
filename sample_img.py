@@ -4,7 +4,8 @@ get_path = os.path.dirname(__file__)
 sys.path.append(get_path)
 current_path = os.path.dirname(__file__).split('/')
 import torch
-from ViT import BFN_U_Vit
+from ViT import U_Vit
+from scipy.stats import truncnorm
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 import torchvision.transforms.functional as transF
@@ -42,12 +43,11 @@ if __name__ == "__main__":
         pass
     modelName = training_parameters["framework"]
     image_size = training_parameters["image_size"]
-    sigma1 = training_parameters["sigma1"] 
     patch_size = training_parameters["patch_size"] 
     embed_dim = training_parameters["embed_dim"] 
     depth = training_parameters["depth"] 
     head = training_parameters["head"]    
-    model = BFN_U_Vit(img_size=image_size,patch_size=patch_size,embed_dim=embed_dim,depth=depth,num_heads=head,sigma1=sigma1)
+    model = U_Vit(img_size=image_size,patch_size=patch_size,embed_dim=embed_dim,depth=depth,num_heads=head)
 
     if load == 'best':
         initializing = os.path.join(os.path.dirname(ExpDir),'bestloss.pkl')
@@ -63,18 +63,20 @@ if __name__ == "__main__":
     model.eval()
     img_size = model.img_size
 
-    for imageclass in range(102):
-        img,labels = model.sampler(device,steps,n_sqrt**2,imageclass+1)
-        fig = plt.figure(figsize=img_size)
-        grid = ImageGrid(fig, 111,  # similar to subplot(111)
-                        nrows_ncols=(n_sqrt, n_sqrt),  # creates 2x2 grid of axes
-                        axes_pad=0.1,  # pad between axes in inch.
-                        )
-        for ax, im,l in zip(grid,img,labels):
-            # Iterating over the grid returns the Axes.
-            ax.imshow(transF.to_pil_image(im))
-            #ax.text(0,8,str(l),fontsize=60, color='blue')
-        plt.savefig(os.path.join(SavedDir,f"samples_{imageclass+1}.png"),bbox_inches='tight')
-        plt.close()
+    input_noise = torch.tensor(truncnorm.rvs(a=-1,b=1,scale=1,size=(n_sqrt**2,3,img_size[0],img_size[1])),device=device).float()
+    img,labels = model.forward_transforms(input_noise,device,k=steps,N=n_sqrt**2,labels=None)
+    img = torch.clip_(img,-1,1)
+    img = (img.cpu()+1)/2
+    fig = plt.figure(figsize=(img_size[0]*n_sqrt/8,img_size[1]*n_sqrt/8),dpi=64)
+    grid = ImageGrid(fig, 111,  # similar to subplot(111)
+                    nrows_ncols=(n_sqrt, n_sqrt),  # creates 2x2 grid of axes
+                    axes_pad=0.1,  # pad between axes in inch.
+                    )
+    for ax, im,l in zip(grid,img,labels):
+        # Iterating over the grid returns the Axes.
+        ax.imshow(transF.to_pil_image(im))
+        #ax.text(0,8,str(l),fontsize=60, color='blue')
+    plt.savefig(os.path.join(SavedDir,"samples.png"),bbox_inches='tight')
+    plt.close()
 
 

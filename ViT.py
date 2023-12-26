@@ -6,6 +6,7 @@ import warnings
 import os,sys
 import numpy as np
 import torch.nn.functional as F
+from tqdm import tqdm
 get_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(get_path)
 current_path = os.path.dirname(os.path.abspath(__file__)).split('/')
@@ -294,8 +295,9 @@ class U_Vit(nn.Module):
         if labels is None:
             labels = torch.zeros(N).long().to(device)
         img = input_samples
-        for i in range(k):
-            img += self.forward(img,i/k,labels)/k
+        for i in tqdm(range(k)):
+            t = i/k*torch.ones(N,device=device)
+            img += self.forward(img,t,labels)/k
         return img,labels.cpu().numpy()
 
     @torch.no_grad()
@@ -306,8 +308,9 @@ class U_Vit(nn.Module):
         if labels is None:
             labels = torch.zeros(N).long().to(device)
         img = input_samples
-        for i in range(k,0,-1):
-            img -= self.forward(img,i/k,labels)/k
+        for i in tqdm(range(k,0,-1)):
+            t = i/k*torch.ones(N,device=device)
+            img -= self.forward(img,t,labels)/k
         return img,labels.cpu().numpy()
 
 def RFlow_Loss(pred,img,noise):
