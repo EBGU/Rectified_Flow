@@ -313,6 +313,16 @@ class U_Vit(nn.Module):
             img -= self.forward(img,t,labels)/k
         return img,labels.cpu().numpy()
 
+class ModelWapper4ODE(nn.Module):
+    def __init__(self,model) -> None:
+        super().__init__()
+        self.model = model
+    def forward(self,t,y):
+        N,_,_,_ = y.shape
+        t = t*torch.ones(N,device=y.device).float()
+        labels = torch.zeros(N,device=y.device).long()
+        return self.model(y,t,labels)
+
 def RFlow_Loss(pred,img,noise):
     loss = F.huber_loss(pred,img-noise)
     return loss

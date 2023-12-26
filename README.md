@@ -31,6 +31,10 @@ To run inference, please  download my pretrained weight(will be provided later):
 
 ` python sample_img.py --device "cuda:0" --load "last" --SavedDir tmp/ --ExpConfig example/example.yaml --n_sqrt 16 --steps 200 `
 
+or use an ODE solver:
+` pip install torchdiffeq `
+` python sample_img_ODESolver.py --device "cuda:0" --load "last" --SavedDir tmp/ --ExpConfig example/example.yaml --n_sqrt 16 --rtol 0.001 `
+
 The inference process is controled by 6 parameters :
 
 "device", usually 'cuda:0' ;
@@ -43,7 +47,9 @@ The inference process is controled by 6 parameters :
 
 "n_sqrt", you will get N<sup>2</sup> samples for each class;
 
-"steps", n steps for sampling, in my experiment, 200 is a good choice.
+"steps", n steps for sampling, in my experiment, 200 is a good choice;
+
+"rtol", acceptable relative error per step, 1e-3 is good enough.
 
 The result should looks like the welcoming images.
 
