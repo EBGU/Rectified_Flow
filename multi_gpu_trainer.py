@@ -169,8 +169,8 @@ if __name__ == '__main__':
     import shutil
     current_path = os.path.dirname(os.path.abspath(__file__))
     sys.path.append(current_path)
-    #ExpName = sys.argv[1]
-    ExpName = '20231225'
+    ExpName = sys.argv[1]
+    #ExpName = '20231225'
     with open(current_path+'/'+ExpName+'.yaml') as f:
         training_parameters = yaml.full_load(f)
 

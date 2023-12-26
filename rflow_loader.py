@@ -62,6 +62,40 @@ class Interpolation_Dataset(Dataset):
     def __len__(self):
         return len(self.imgList)
 
+class Oxford17_dataset(Dataset): 
+    '''
+    your folder should have following structrues:
+    
+    root
+        --1.jpg
+        --2.jpg
+        --...
+    '''
+    def __init__(self,
+                 root: str,
+                 imgSize=[32,32],
+                 class_size = 80):
+
+        self.root = root
+        self.width, self.height = imgSize
+        self.imgList = os.listdir(root)
+        self.list = os.listdir(root)
+        self.class_size = class_size
+
+    def __getitem__(self, index):
+        #index = random.randint(0,9)
+        filename = self.imgList[int(index)]
+        label = int(filename.split('.')[0].split('_')[1])//self.class_size          
+        path = os.path.join(self.root,filename)
+        img = pil_loader(path)
+        img = F.to_tensor(img)
+        img = F.resize(img,(self.width,self.height),antialias=False)
+        img = img*2 -1 #[xmin, xmax] = [−1, 1]
+        return img,label
+
+    def __len__(self):
+        return len(self.imgList)
+
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

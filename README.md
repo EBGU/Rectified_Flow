@@ -21,11 +21,16 @@ A replication of [Rectified Flow](https://arxiv.org/abs/2209.03003) paper with P
   <img src="images/11.png" width="200" />
   <img src="images/12.png" width="200" />
 </p>
+
+## Training
+
 To train a new model, you can modify the yaml file and:
 
 ` python multi_gpu_trainer.py example `
 
 Training data of [Oxford Flowers](https://www.robots.ox.ac.uk/~vgg/data/flowers/) should be split manually, and you can find the numpy version of their labels in this repo.
+
+## Inference
 
 To run inference, please  download my pretrained weight(will be provided later):
 
@@ -52,6 +57,14 @@ The inference process is controled by 6 parameters :
 "rtol", acceptable relative error per step, 1e-3 is good enough.
 
 The result should looks like the welcoming images.
+
+## Image interpolation
+
+![interpolation](images/img_interpolation.png)
+
+` python image_interpolation.py --device "cuda:0" --load "last" --SavedDir tmp/ --ExpConfig example/example.yaml --input_image images/image1.jpg --target_image images/image2.jpg --rtol 0.0001 --mix_depth -0.02 --spherical True `
+
+**This function is experimental and currently does not work well!**
 
 Enjoy!
 
