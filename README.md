@@ -32,7 +32,7 @@ Training data of [Oxford Flowers](https://www.robots.ox.ac.uk/~vgg/data/flowers/
 
 ## Inference
 
-To run inference, please  download my pretrained weight(will be provided later):
+To run inference, please  download my [pretrained weight](https://drive.google.com/file/d/1LMCcY0plI6Sx4roOpjN6mk1gQktN9AVa/view?usp=drive_link):
 
 ` python sample_img.py --device "cuda:0" --load "last" --SavedDir tmp/ --ExpConfig example/example.yaml --n_sqrt 16 --steps 200 `
 
